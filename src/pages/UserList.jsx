@@ -1,58 +1,46 @@
-import React, { useEffect, useState } from "react";
-import { getUsers, deleteUser } from "../services/api";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
 
-function UserList() {
-    const [users, setUsers] = useState([]);
-    const navigate = useNavigate();
+const UserList = () => {
+  const [users, setUsers] = useState([]);
 
-    // Fetch users on component mount
-    useEffect(() => {
-        fetchUsers();
-    }, []);
+  useEffect(() => {
+    axios.get("https://jsonplaceholder.typicode.com/users")
+      .then(response => setUsers(response.data))
+      .catch(error => console.error("Error fetching users:", error));
+  }, []);
 
-    const fetchUsers = async () => {
-        const data = await getUsers();
-        setUsers(data);
-    };
-
-    // Handle delete
-    const handleDelete = async (id) => {
-        if (window.confirm("Are you sure you want to delete this user?")) {
-            await deleteUser(id);
-            setUsers(users.filter(user => user.id !== id));
-        }
-    };
-
-    return (
-        <div>
-            <h2>User List</h2>
-            <button onClick={() => navigate("/add")}>Add User</button>
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {users.map((user) => (
-                        <tr key={user.id}>
-                            <td>{user.id}</td>
-                            <td>{user.name}</td>
-                            <td>{user.email}</td>
-                            <td>
-                                <button onClick={() => navigate(`/edit/${user.id}`)}>Edit</button>
-                                <button onClick={() => handleDelete(user.id)}>Delete</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
-}
+  return (
+    <div>
+      <h2 className="text-2xl font-bold mb-4">User List</h2>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse border border-gray-300 shadow-lg">
+          <thead>
+            <tr className="bg-gray-200 text-gray-700">
+              <th className="border p-3">ID</th>
+              <th className="border p-3">Name</th>
+              <th className="border p-3">Email</th>
+              <th className="border p-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user, index) => (
+              <tr key={user.id} className="border hover:bg-gray-100">
+                <td className="border p-3 text-center">{index + 1}</td>
+                <td className="border p-3">{user.name}</td>
+                <td className="border p-3">{user.email}</td>
+                <td className="border p-3 flex justify-center gap-4">
+                  <Link to={`/edit-user/${user.id}`} className="text-blue-500 font-semibold hover:underline">Edit</Link>
+                  <button className="text-red-500 font-semibold hover:underline">Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
 
 export default UserList;
